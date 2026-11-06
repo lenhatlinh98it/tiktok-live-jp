@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Survival Battle Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800;900&family=Dela+Gothic+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="battle.css">
+</head>
+<body>
+<div id="stage">
+  <div class="bg"></div>
+  <div class="spot l"></div><div class="spot r"></div>
+  <div class="abyss"></div>
+  <canvas id="world" width="1080" height="1920"></canvas>
+
+  <div class="title">生き残りバトル</div>
+  <div class="hud">
+    <div class="panel">
+      <div class="ptitle">👑 王者ランキング</div>
+      <ol id="board"></ol>
+    </div>
+    <div class="center">
+      <div id="phase" class="chip">参戦受付中 <b>20</b></div>
+      <div class="chip small">生存 <b id="alive">0</b> / <b id="total">0</b></div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">💥 撃墜ログ</div>
+      <ul id="feed"></ul>
+    </div>
+  </div>
+
+  <div id="big" class="big"></div>
+  <div id="slowmo" class="slowmo">SLOW MOTION</div>
+  <div id="banner"></div>
+
+  <div class="legend">
+    <div class="row"><b>💬 コメントで参戦！</b>　「左」「右」「ジャンプ」で操作 ・ ❤️いいね＝ホップ</div>
+    <div class="gifts">
+      <div><span>🌹 1〜9💎</span>体当たり／復活</div>
+      <div><span>🍩 10〜99💎</span>巨大化 10秒</div>
+      <div><span>🎩 100〜499💎</span>💣 爆弾投下</div>
+      <div><span>🎆 500💎〜</span>☄️ 隕石落下</div>
+    </div>
+  </div>
+
+  <div id="result" class="result"></div>
+  <div id="status"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js" integrity="sha384-OqQP3UcU7efkEYDRjGmQou2uEvzGFGRtwdYXTjnupeB9cWogSgQ4BOhyklFBYbBR" crossorigin="anonymous"></script>
+<script src="battle.js"></script>
+</body>
+</html>

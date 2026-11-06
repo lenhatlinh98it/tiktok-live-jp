@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wedding Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="wedding.css">
+</head>
+<body>
+<div id="stage">
+  <div class="hall"></div>
+  <div class="window"></div>
+
+  <svg class="arch" viewBox="0 0 520 600" aria-hidden="true">
+    <rect x="30" y="200" width="34" height="400" rx="6" fill="#fffaf5" stroke="#e8d5c4" stroke-width="3"/>
+    <rect x="456" y="200" width="34" height="400" rx="6" fill="#fffaf5" stroke="#e8d5c4" stroke-width="3"/>
+    <path d="M47,220 A213,213 0 0 1 473,220" fill="none" stroke="#fffaf5" stroke-width="30"/>
+    <g id="flowers"></g>
+  </svg>
+  <div class="altar-step"></div>
+
+  <div class="carpet"></div>
+  <div class="side-label left">NHÀ TRAI 🤵</div>
+  <div class="side-label right">👰 NHÀ GÁI</div>
+
+  <div id="seats"></div>
+  <div id="dim"></div>
+  <div id="people"></div>
+  <div id="fx"></div>
+
+  <div class="title">Lễ Đường Tình Yêu</div>
+  <div class="hud">
+    <div class="panel legend">
+      <div class="ptitle">CÁCH THAM GIA</div>
+      <div>💬 <b>trai</b> / <b>gái</b> — chọn phe</div>
+      <div>💍 <b>cưới</b> — đăng ký ghép đôi</div>
+      <div>💖 <b>đồng ý</b> — chúc phúc cặp đôi</div>
+      <div class="sep"></div>
+      <div>🧧 Quà bất kỳ — tiền mừng cưới</div>
+      <div>⚡ Quà ≥ <b id="stealCost">299</b>💎 — <b>cướp dâu / rể</b></div>
+    </div>
+    <div class="panel couples">
+      <div class="ptitle">💞 CẶP ĐÔI ĐÃ THÀNH</div>
+      <ol id="couples"></ol>
+    </div>
+  </div>
+  <div class="next">
+    <div id="clock" class="clock">💒 Lễ cưới tiếp theo <b id="timer">3:00</b></div>
+    <div class="pool">💗 Chờ ghép: <b id="poolTrai">0</b> trai · <b id="poolGai">0</b> gái</div>
+  </div>
+
+  <div id="ceremony" class="ceremony">
+    <div class="names"><span id="cGroom"></span> <i>❤</i> <span id="cBride"></span></div>
+    <div class="compat" id="cCompat"></div>
+    <div class="vote">
+      <div class="vtext">Cả họ đồng ý? Comment <b>đồng ý</b> <span id="cVotes">0/10</span> · <span id="cTime">25</span>s</div>
+      <div class="meter"><i id="cMeter"></i></div>
+    </div>
+    <div class="envelope">🧧 Tiền mừng: <b id="cEnv">0</b>💎</div>
+  </div>
+
+  <div id="banner"></div>
+  <div id="status"></div>
+</div>
+<script src="wedding.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tug Debate Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tug.css">
+</head>
+<body>
+<div id="stage">
+  <div class="bg a"></div>
+  <div class="bg b"></div>
+
+  <!-- Topic -->
+  <div class="topic">
+    <div class="round" id="round">VÒNG 1</div>
+    <div class="vs"><span class="na" id="nameA">PHỞ</span><i>VS</i><span class="nb" id="nameB">BÚN BÒ</span></div>
+  </div>
+
+  <!-- PK bar -->
+  <div class="pk">
+    <div class="pk-bar"><div class="pa" id="barA"></div><div class="pb" id="barB"></div></div>
+    <div class="sc l" id="scoreA">0</div>
+    <div class="sc r" id="scoreB">0</div>
+    <div class="timer" id="timer">75</div>
+  </div>
+  <div class="howto">
+    <div>Comment <b class="ka">A</b> vào phe <span id="howA">Phở</span> · <b class="kb">B</b> vào phe <span id="howB">Bún bò</span></div>
+    <div>❤️ Like = kéo · 🎁 Quà = kéo cực mạnh</div>
+  </div>
+
+  <!-- Tug scene -->
+  <div class="ground">
+    <div class="goal l"></div><div class="goal r"></div><div class="mid"></div>
+  </div>
+  <div id="tug">
+    <div class="rope"></div>
+    <div class="knot"></div>
+    <div id="pullA" class="team-pullers"></div>
+    <div id="pullB" class="team-pullers"></div>
+  </div>
+
+  <!-- Teams -->
+  <div class="teams">
+    <div class="team ta"><div class="cnt"><b id="cntA">0</b> người</div><ul id="feedA"></ul></div>
+    <div class="team tb"><div class="cnt"><b id="cntB">0</b> người</div><ul id="feedB"></ul></div>
+  </div>
+
+  <div id="x2" class="x2">⚡ X2 LỰC KÉO ⚡</div>
+  <div id="takeover"></div>
+  <div id="fx"></div>
+
+  <div id="result" class="result">
+    <div class="r-title">🏆 CHÂN LÝ THUỘC VỀ</div>
+    <div class="r-side" id="rSide"></div>
+    <div class="r-ko" id="rKo"></div>
+    <div class="mvp">
+      <div class="mvp-av" id="mvpAv"></div>
+      <div><div class="mvp-label">MVP</div><div class="mvp-name" id="mvpName"></div><div class="mvp-pts" id="mvpPts"></div></div>
+    </div>
+    <div class="next" id="next"></div>
+  </div>
+  <div id="status"></div>
+</div>
+<script src="tug.js"></script>
+</body>
+</html>

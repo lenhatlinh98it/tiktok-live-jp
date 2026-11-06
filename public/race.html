@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marble Race Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800;900&family=Dela+Gothic+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="race.css">
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/build/three.module.js", "three/addons/": "/vendor/three/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="1080" height="1920"></canvas>
+  <div id="flash" class="flash"></div>
+
+  <div class="title">ビー玉レース</div>
+  <div class="hud">
+    <div class="panel">
+      <div class="ptitle">🏁 現在の順位</div>
+      <ol id="rank"></ol>
+    </div>
+    <div class="center">
+      <div id="phase" class="chip">参加受付中 <b>20</b></div>
+      <div class="chip small">参加 <b id="count">0</b> 人</div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">👑 優勝回数</div>
+      <ol id="board"></ol>
+    </div>
+  </div>
+
+  <div id="labels"></div>
+  <div id="big" class="big"></div>
+  <div id="banner"></div>
+
+  <div class="legend">
+    <div class="row"><b>💬 コメントで参加！</b>　「ジャンプ」で障害物をよける ・ ❤️いいね＝加速</div>
+    <div class="gifts">
+      <div><span>1〜4💎</span>🔥 ニトロ2秒</div>
+      <div><span>5〜29💎</span>🛢️ 後ろにオイル</div>
+      <div><span>30〜99💎</span>🚀 前の玉にミサイル</div>
+      <div><span>100〜499💎</span>🛡️ バリア＋ニトロ</div>
+      <div><span>500〜999💎</span>⚡ 上位3人に落雷</div>
+      <div><span>1000💎〜</span>🌀 ワープ＋バリア</div>
+    </div>
+  </div>
+
+  <div id="result" class="result"></div>
+  <div id="status"></div>
+</div>
+<script type="module" src="race.js"></script>
+</body>
+</html>

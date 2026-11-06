@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Temple Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&family=Noto+Serif:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+<div id="stage">
+  <!-- ===== Static scene ===== -->
+  <div class="wall"></div>
+  <div class="beam"><span id="title">CHÁNH ĐIỆN TRỰC TUYẾN</span></div>
+  <div class="pillar left"></div>
+  <div class="pillar right"></div>
+  <div class="lantern" style="left:150px"></div>
+  <div class="lantern" style="left:930px;animation-delay:-1.5s"></div>
+
+  <div class="halo"></div>
+  <svg class="lotus big" viewBox="-120 -110 240 130" aria-hidden="true">
+    <defs>
+      <linearGradient id="petal" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0" stop-color="#f7a8c4"/><stop offset="1" stop-color="#fff1f6"/>
+      </linearGradient>
+      <linearGradient id="petalBack" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0" stop-color="#e2729c"/><stop offset="1" stop-color="#f9c6d8"/>
+      </linearGradient>
+    </defs>
+    <g fill="url(#petalBack)">
+      <path transform="rotate(-75)" d="M0,0 C-20,-30 -14,-72 0,-98 C14,-72 20,-30 0,0Z"/>
+      <path transform="rotate(75)" d="M0,0 C-20,-30 -14,-72 0,-98 C14,-72 20,-30 0,0Z"/>
+      <path transform="rotate(-45)" d="M0,0 C-20,-30 -14,-72 0,-98 C14,-72 20,-30 0,0Z"/>
+      <path transform="rotate(45)" d="M0,0 C-20,-30 -14,-72 0,-98 C14,-72 20,-30 0,0Z"/>
+    </g>
+    <g fill="url(#petal)" stroke="#e98bb0" stroke-width="1.5">
+      <path transform="rotate(-25)" d="M0,0 C-22,-32 -15,-78 0,-104 C15,-78 22,-32 0,0Z"/>
+      <path transform="rotate(25)" d="M0,0 C-22,-32 -15,-78 0,-104 C15,-78 22,-32 0,0Z"/>
+      <path d="M0,0 C-24,-34 -16,-84 0,-110 C16,-84 24,-34 0,0Z"/>
+    </g>
+    <ellipse cx="0" cy="4" rx="70" ry="12" fill="#3f8f5a"/>
+  </svg>
+
+  <div class="altar">
+    <div class="candle l"><i></i></div>
+    <div class="candle r"><i></i></div>
+    <div class="burner"><div class="sticks"><i></i><i></i><i></i></div></div>
+    <div id="smoke"></div>
+  </div>
+
+  <div class="floor"></div>
+  <div class="door"></div>
+
+  <!-- ===== Dynamic layers ===== -->
+  <div id="rays"></div>
+  <div id="seats"></div>
+  <div id="people"></div>
+  <div id="fx"></div>
+
+  <div class="hud">
+    <div class="counter">🙏 <b id="count">0</b> Phật tử đang tham dự</div>
+    <div class="merit">
+      <div class="merit-title">BẢNG CÔNG ĐỨC</div>
+      <ol id="board"></ol>
+    </div>
+  </div>
+  <div id="banner"></div>
+  <div id="status"></div>
+</div>
+<script src="overlay.js"></script>
+</body>
+</html>

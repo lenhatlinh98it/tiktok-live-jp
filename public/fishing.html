@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fishing Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&family=Yuji+Syuku&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fishing.css">
+</head>
+<body>
+<div id="stage">
+  <!-- Sky -->
+  <div class="sky"></div>
+  <div class="sun"></div>
+  <svg class="fuji" viewBox="0 0 1080 300" aria-hidden="true">
+    <path d="M0,300 L0,250 Q200,230 330,210 L470,70 Q540,40 610,70 L760,210 Q900,232 1080,248 L1080,300Z" fill="#5a78a8"/>
+    <path d="M470,70 Q540,40 610,70 L650,110 Q620,100 600,122 Q575,100 548,124 Q520,98 495,120 Q470,102 432,110Z" fill="#fff"/>
+  </svg>
+  <div class="cloud c1"></div><div class="cloud c2"></div>
+
+  <!-- Water -->
+  <div class="water"></div>
+  <div class="deco" id="deco"></div>
+  <div id="bossShadow" class="boss-shadow">🐟</div>
+
+  <!-- Boat & angler -->
+  <div class="boat">
+    <svg viewBox="0 0 260 120" aria-hidden="true">
+      <path d="M10,60 L250,60 L215,110 L45,110Z" fill="#a0522d" stroke="#5a2d0c" stroke-width="5"/>
+      <rect x="10" y="52" width="240" height="12" rx="4" fill="#d2a06a"/>
+      <circle cx="130" cy="0" r="0"/>
+    </svg>
+    <div class="angler">🧑‍🦱</div>
+    <div class="rod"></div>
+  </div>
+  <svg id="line" class="line" viewBox="0 0 1080 1920"><path id="linePath" d="" stroke="#fff" stroke-width="3" fill="none" opacity=".85"/></svg>
+
+  <div id="floats"></div>
+  <div id="fx"></div>
+
+  <!-- HUD -->
+  <div class="title">みんなで釣り大会</div>
+  <div class="hud">
+    <div class="panel">
+      <div class="ptitle">🏆 今日の最大魚</div>
+      <ol id="board"></ol>
+    </div>
+    <div class="center">
+      <div id="bossClock" class="chip">ヌシ出現まで <b>5:00</b></div>
+      <div class="chip small">🎣 <b id="anglers">0</b>人が参加中</div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">🐟 最近の釣果</div>
+      <ul id="feed"></ul>
+    </div>
+  </div>
+
+  <!-- Boss battle panel -->
+  <div id="battle" class="battle">
+    <div class="b-head"><span id="bossName">ヌシ</span> <span class="b-time" id="bossTime">75</span></div>
+    <div class="tension">
+      <div class="side f">🐟 魚チーム <b id="cntF">0</b></div>
+      <div class="bar"><div class="zone-f"></div><div class="zone-a"></div><div id="marker" class="marker">🎣</div></div>
+      <div class="side a"><b id="cntA">0</b> 釣りチーム 🎣</div>
+    </div>
+    <div class="mvps"><div id="mvpF" class="mvp f"></div><div id="reelHint" class="reel">配信者：<b>スペース連打！</b></div><div id="mvpA" class="mvp a"></div></div>
+    <div id="lastspurt" class="lastspurt">🔥 ラストスパート x2 🔥</div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend" id="legendNormal">
+    <div class="lg-title">遊び方</div>
+    <div>💬 <b>「釣る」</b>とコメントで釣り糸を垂らそう！</div>
+    <div>📖 集めた魚は図鑑に記録 ・ 大物は<b>魚拓</b>に！</div>
+    <div>⚠️ 定期的に<b>ヌシ</b>が出現 → チームに分かれてバトル</div>
+  </div>
+  <div class="legend battle-legend" id="legendBattle">
+    <div class="col f">
+      <div class="lg-title">🐟 魚チーム（コメント「魚」）</div>
+      <div>🌹 小ギフト：暴れる</div>
+      <div>🍩 30💎〜：<b>糸が絡まる</b>（リール封印3秒）</div>
+      <div>🎩 100💎〜：<b>大暴れ</b>！</div>
+    </div>
+    <div class="col a">
+      <div class="lg-title">🎣 釣りチーム（コメント「釣」）</div>
+      <div>🌹 小ギフト：巻き上げ</div>
+      <div>🍩 30💎〜：<b>タモ網</b>で引き寄せ</div>
+      <div>🎩 100💎〜：<b>助っ人の船</b>（8秒x2）</div>
+    </div>
+  </div>
+
+  <div id="banner"></div>
+  <div id="gyotaku"></div>
+  <div id="result" class="result"></div>
+  <div id="status"></div>
+</div>
+<script src="fishing.js"></script>
+</body>
+</html>

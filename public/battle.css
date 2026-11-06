@@ -1,0 +1,89 @@
+:root { --gold: #ffd23f; --neon: #00f0ff; --pink: #ff2e88; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #05010d; }
+body { font-family: 'M PLUS Rounded 1c', system-ui, sans-serif; color: #fff; }
+#stage { position: absolute; left: 50%; top: 50%; width: 1080px; height: 1920px; transform-origin: center; overflow: hidden; }
+
+.bg { position: absolute; inset: 0; background:
+  radial-gradient(ellipse 70% 40% at 50% 55%, rgba(120,40,255,.35), transparent 70%),
+  repeating-linear-gradient(90deg, rgba(0,240,255,.05) 0 2px, transparent 2px 90px),
+  repeating-linear-gradient(0deg, rgba(0,240,255,.05) 0 2px, transparent 2px 90px),
+  linear-gradient(#0b0220, #1a0640 50%, #0b0220); }
+.spot { position: absolute; top: -100px; width: 500px; height: 1500px; opacity: .25; filter: blur(10px);
+  background: linear-gradient(rgba(255,255,255,.9), transparent); clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%); animation: sweep 6s ease-in-out infinite alternate; }
+.spot.l { left: -60px; transform-origin: 50% 0; } .spot.r { right: -60px; transform-origin: 50% 0; animation-delay: -3s; }
+@keyframes sweep { from { transform: rotate(-18deg); } to { transform: rotate(18deg); } }
+.abyss { position: absolute; left: 0; right: 0; top: 1420px; height: 360px;
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, #ff4d00, #b3001b 45%, transparent 75%); opacity: .85; animation: lava 2.5s ease-in-out infinite alternate; }
+@keyframes lava { to { opacity: .6; transform: scaleY(1.05); } }
+#world { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+
+.title { position: absolute; top: 22px; left: 0; right: 0; text-align: center; font-family: 'Dela Gothic One', sans-serif; font-size: 92px; z-index: 20;
+  color: #fff; text-shadow: 0 0 10px var(--pink), 0 0 30px var(--pink), 0 6px 0 #5a0030; letter-spacing: 4px; }
+.hud { position: absolute; top: 150px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; z-index: 20; }
+.panel { width: 330px; padding: 10px 14px; border-radius: 16px; background: rgba(10,0,30,.8); border: 2px solid var(--neon); box-shadow: 0 0 16px rgba(0,240,255,.35); font-size: 19px; }
+.ptitle { font-weight: 900; text-align: center; color: var(--gold); margin-bottom: 4px; }
+#board { margin: 0; padding-left: 24px; line-height: 1.5; }
+#board li span { float: right; color: var(--gold); }
+#board:empty::after { content: 'まだ王者なし'; opacity: .6; margin-left: -24px; }
+#feed { list-style: none; margin: 0; padding: 0; line-height: 1.45; }
+#feed li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: liIn .3s ease-out; }
+#feed li b { color: var(--pink); }
+#feed:empty::after { content: '—'; opacity: .6; }
+@keyframes liIn { from { transform: translateX(20px); opacity: 0; } }
+.center { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.chip { font-size: 28px; font-weight: 900; padding: 8px 22px; border-radius: 28px; background: linear-gradient(90deg, #7a00ff, var(--pink)); border: 3px solid #fff; white-space: nowrap; box-shadow: 0 0 20px rgba(255,46,136,.6); }
+.chip b { color: var(--gold); font-size: 34px; }
+.chip.small { font-size: 22px; background: rgba(10,0,30,.85); border-width: 2px; box-shadow: none; }
+.chip.small b { font-size: 26px; }
+.chip.hot { animation: hot .5s ease-in-out infinite alternate; }
+@keyframes hot { to { transform: scale(1.1); } }
+
+.big { position: absolute; left: 0; right: 0; top: 760px; text-align: center; z-index: 25; pointer-events: none; font-family: 'Dela Gothic One', sans-serif; font-size: 150px;
+  color: #fff; text-shadow: 0 0 20px var(--pink), 0 0 50px var(--pink), 0 8px 0 #5a0030; opacity: 0; }
+.big.on { animation: bigIn 1.4s ease-out forwards; }
+@keyframes bigIn { 0% { transform: scale(3); opacity: 0; } 20% { transform: scale(1); opacity: 1; } 75% { opacity: 1; } 100% { transform: scale(.9); opacity: 0; } }
+.slowmo { position: absolute; left: 50%; top: 1000px; transform: translateX(-50%); z-index: 25; font-family: 'Dela Gothic One', sans-serif; font-size: 60px; letter-spacing: 10px;
+  color: var(--gold); text-shadow: 0 0 20px #f90; display: none; animation: blink .3s steps(2) infinite; }
+.slowmo.on { display: block; }
+@keyframes blink { 50% { opacity: .4; } }
+
+#banner { position: absolute; left: 50%; top: 440px; transform: translateX(-50%); z-index: 30; pointer-events: none; }
+.bn { display: flex; align-items: center; gap: 14px; padding: 12px 28px 12px 12px; border-radius: 60px; white-space: nowrap; border: 3px solid #fff;
+  background: linear-gradient(90deg, #3a007a, #7a00ff); box-shadow: 0 0 30px rgba(122,0,255,.7); animation: bnIn .4s cubic-bezier(.2,1.4,.4,1); }
+.bn.t2 { background: linear-gradient(90deg, #005a7a, #00b3ff); }
+.bn.t3 { background: linear-gradient(90deg, #7a1a00, #ff4d00); border-color: var(--gold); }
+.bn.t4 { background: linear-gradient(90deg, #ff4d00, #ffd23f, #ff4d00); border-color: #fff; transform: scale(1.12); }
+.bn.t4 .who { color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,.6); }
+.bn .av { width: 76px; height: 76px; border-radius: 50%; border: 3px solid #fff; overflow: hidden; background: #ddd; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; color: #333; }
+.bn .av img { width: 100%; height: 100%; object-fit: cover; }
+.bn .who { font-size: 28px; font-weight: 900; color: var(--gold); }
+.bn .what { font-size: 25px; font-weight: 900; }
+.bn .ic { font-size: 54px; }
+.bn.out { animation: bnOut .3s ease-in forwards; }
+@keyframes bnIn { from { transform: translateY(-30px) scale(.6); opacity: 0; } }
+@keyframes bnOut { to { transform: translateY(-20px); opacity: 0; } }
+
+.legend { position: absolute; left: 24px; right: 24px; bottom: 22px; padding: 14px 20px; border-radius: 20px; z-index: 20; background: rgba(10,0,30,.85); border: 2px solid var(--pink);
+  font-size: 23px; font-weight: 900; }
+.legend .row { text-align: center; margin-bottom: 10px; }
+.legend .row b { color: var(--gold); }
+.gifts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 22px; }
+.gifts div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 12px; border-radius: 12px; background: rgba(255,255,255,.07); }
+.gifts span { color: var(--neon); }
+
+.result { position: absolute; inset: 0; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: rgba(5,0,15,.78); text-align: center; }
+.result.on { display: flex; animation: fadeIn .4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; } }
+.result h1 { margin: 0; font-family: 'Dela Gothic One', sans-serif; font-size: 120px; color: var(--gold); text-shadow: 0 0 30px #f90, 0 8px 0 #7a3a00; }
+.result .crown { font-size: 120px; margin-bottom: -50px; animation: float 1.5s ease-in-out infinite; }
+@keyframes float { 50% { transform: translateY(-14px); } }
+.result .av { width: 300px; height: 300px; border-radius: 50%; overflow: hidden; border: 10px solid var(--gold); background: #ddd; display: flex; align-items: center; justify-content: center;
+  font-size: 120px; font-weight: 900; color: #333; box-shadow: 0 0 60px rgba(255,210,63,.9); animation: slam .6s cubic-bezier(.2,1.6,.4,1); }
+.result .av img { width: 100%; height: 100%; object-fit: cover; }
+@keyframes slam { from { transform: scale(3); opacity: 0; } }
+.result .name { font-size: 64px; font-weight: 900; max-width: 960px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result .stats { font-size: 34px; font-weight: 900; color: var(--neon); }
+
+#status { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 18px; padding: 4px 14px; border-radius: 12px; background: rgba(0,0,0,.6); z-index: 60; display: none; }
+#status.show { display: block; }

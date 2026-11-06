@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Christmas Tree Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="noel.css">
+</head>
+<body>
+<div id="stage">
+  <div class="sky"></div>
+  <div class="moon"></div>
+  <canvas id="fireworks" width="1080" height="1920"></canvas>
+
+  <svg id="scene" viewBox="0 0 1080 1920" aria-hidden="true">
+    <defs>
+      <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#0d4a2a"/><stop offset=".5" stop-color="#1f7a43"/><stop offset="1" stop-color="#0b3f24"/>
+      </linearGradient>
+      <linearGradient id="snowGround" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f4f8ff"/><stop offset="1" stop-color="#c9d8f0"/>
+      </linearGradient>
+      <radialGradient id="ice" cx=".5" cy=".4" r=".7">
+        <stop offset="0" stop-color="#e8f6ff"/><stop offset=".7" stop-color="#a9d4f2"/><stop offset="1" stop-color="#7fb6e0"/>
+      </radialGradient>
+    </defs>
+    <path d="M0,1300 Q180,1230 380,1280 T760,1270 T1080,1290 L1080,1920 L0,1920Z" fill="url(#snowGround)"/>
+    <ellipse cx="540" cy="1650" rx="470" ry="190" fill="#ffffff" opacity=".9"/>
+    <ellipse cx="540" cy="1650" rx="450" ry="175" fill="url(#ice)"/>
+    <ellipse cx="540" cy="1650" rx="300" ry="105" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="3"/>
+    <rect x="505" y="1270" width="70" height="70" rx="6" fill="#6b3d1f"/>
+    <g id="tree"></g>
+    <g id="garland"></g>
+  </svg>
+
+  <div id="star" class="star">★</div>
+  <div id="presents"></div>
+  <div id="ornaments"></div>
+  <div id="cards"></div>
+  <div id="skaters"></div>
+  <div id="fx"></div>
+  <canvas id="snow" width="1080" height="1920"></canvas>
+
+  <div class="title">Cùng thắp sáng cây thông</div>
+  <div class="progress">
+    <div class="bar"><i id="bar"></i></div>
+    <div class="ptext"><span id="ptext">0 / 1000 💎</span><span id="lvl"></span></div>
+  </div>
+  <div class="hud">
+    <div class="chips">
+      <div class="chip">🎄 <b id="count">0</b> người đang tham gia</div>
+      <div class="chip" id="countdown"></div>
+    </div>
+    <div class="board">
+      <div class="board-title">TOP ÔNG GIÀ NOEL</div>
+      <ol id="board"></ol>
+    </div>
+  </div>
+  <div id="banner"></div>
+  <div id="status"></div>
+</div>
+<script src="noel.js"></script>
+</body>
+</html>

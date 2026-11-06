@@ -1,0 +1,24 @@
+{
+  "name": "tiktok-temple-overlay",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "demo": "node server.js --demo",
+    "demo:noel": "node server.js --demo --noel",
+    "demo:wedding": "node server.js --demo --wedding",
+    "demo:fishing": "node server.js --demo --fishing",
+    "demo:battle": "node server.js --demo --battle",
+    "demo:race": "node server.js --demo --race"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "three": "^0.187.0",
+    "tiktok-live-connector": "^2.5.0",
+    "ws": "^8.22.1"
+  }
+}
