@@ -20,6 +20,8 @@ const WEDDING = args.includes('--wedding');
 const FISHING = args.includes('--fishing');
 const BATTLE = args.includes('--battle');
 const RACE = args.includes('--race');
+const POND = args.includes('--pond');
+const SEA = args.includes('--sea');
 const USERNAME = (args.find(a => !a.startsWith('--')) || process.env.TIKTOK_USERNAME || '').replace(/^@/, '');
 const THREE_DIR = path.join(__dirname, 'node_modules', 'three');
 
@@ -57,14 +59,14 @@ const server = http.createServer((req, res) => {
   const urlPath = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   if (urlPath === '/avatar') { proxyAvatar(req, res); return; }
   let base = PUBLIC_DIR;
-  let rel = urlPath === '/' ? (RACE ? 'race.html' : BATTLE ? 'battle.html' : FISHING ? 'fishing.html' : WEDDING ? 'wedding.html' : NOEL ? 'noel.html' : 'overlay.html') : urlPath.replace(/^\/+/, '');
+  let rel = urlPath === '/' ? (SEA ? 'sea.html' : POND ? 'pond.html' : RACE ? 'race.html' : BATTLE ? 'battle.html' : FISHING ? 'fishing.html' : WEDDING ? 'wedding.html' : NOEL ? 'noel.html' : 'overlay.html') : urlPath.replace(/^\/+/, '');
   // Serve three.js (build + examples) from node_modules
   if (urlPath.startsWith('/vendor/three/')) { base = THREE_DIR; rel = urlPath.slice('/vendor/three/'.length); }
   const filePath = path.normalize(path.join(base, rel));
   if (!filePath.startsWith(base + path.sep)) { res.writeHead(403).end(); return; }
   fs.readFile(filePath, (err, buf) => {
     if (err) { res.writeHead(404).end('Not found'); return; }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(filePath)] || 'application/octet-stream' });
+    res.writeHead(200, { 'Content-Type': MIME[path.extname(filePath)] || 'application/octet-stream', 'Cache-Control': 'no-cache' });
     res.end(buf);
   });
 });
@@ -81,18 +83,41 @@ function broadcast(evt) {
 }
 
 // ---------- Normalize TikTok payloads ----------
+// tiktok-live-connector 2.5.0 emits raw proto (v3) messages: user.id / displayId / avatarThumb.urlList,
+// chat.content, like.count, gift.gift.{name,diamondCount,type,image}. Older field names are kept as fallbacks.
 function normUser(u = {}) {
-  const pic = u.profilePicture || {};
+  const avatar = u.avatarThumb?.urlList?.[0] || u.avatarMedium?.urlList?.[0] || u.profilePicture?.urls?.[0] || u.profilePictureUrl || '';
+  const uniqueId = u.displayId || u.uniqueId || '';
   return {
-    id: String(u.userId || u.uniqueId || Math.random()),
-    uniqueId: u.uniqueId || '',
-    nickname: u.nickname || u.uniqueId || 'Khách',
-    avatar: pic.urls?.[0] || pic.url?.[0] || u.profilePictureUrl || '',
+    // Empty id -> overlays ignore the event (never use a random id: it would seat the same viewer repeatedly)
+    id: String(u.id || u.idStr || u.userId || uniqueId || ''),
+    uniqueId,
+    nickname: u.nickname || uniqueId || 'Guest',
+    avatar,
   };
 }
 
+// Combo gifts (type 1) send an event at the start (repeatEnd=0) and one when the combo ends (repeatEnd=1),
+// ~3-4s later. React on the first event, then add only the extra count when the combo ends.
+const comboSent = new Map(); // `${userId}:${groupId}` -> count already emitted
+// Returns { count: to emit now, prev: already emitted in this combo, total: combo total so far }
+function giftCount(key, streak, repeatCount, repeatEnd) {
+  const n = repeatCount || 1;
+  if (!streak) return { count: n, prev: 0, total: n };
+  if (!repeatEnd) {
+    if (comboSent.has(key)) return { count: 0, prev: comboSent.get(key), total: n };
+    comboSent.set(key, n);
+    if (comboSent.size > 1000) comboSent.delete(comboSent.keys().next().value);
+    return { count: n, prev: 0, total: n };
+  }
+  const sent = comboSent.get(key) || 0;
+  comboSent.delete(key);
+  return { count: n - sent, prev: sent, total: n };
+}
+
 function connectTikTok(username) {
-  const conn = new TikTokLiveConnection(username);
+  // v2.5.0 requires an options object (crashes on undefined)
+  const conn = new TikTokLiveConnection(username, {});
   let retry = 0;
 
   const connect = () => conn.connect()
@@ -104,21 +129,26 @@ function connectTikTok(username) {
     });
 
   conn.on(WebcastEvent.MEMBER, d => broadcast({ type: 'join', user: normUser(d.user) }));
-  conn.on(WebcastEvent.CHAT, d => broadcast({ type: 'chat', user: normUser(d.user), text: d.comment || '' }));
-  conn.on(WebcastEvent.LIKE, d => broadcast({ type: 'like', user: normUser(d.user), count: d.likeCount || 1 }));
+  conn.on(WebcastEvent.CHAT, d => broadcast({ type: 'chat', user: normUser(d.user), text: d.content ?? d.comment ?? '' }));
+  conn.on(WebcastEvent.LIKE, d => broadcast({ type: 'like', user: normUser(d.user), count: d.count ?? d.likeCount ?? 1 }));
   conn.on(WebcastEvent.FOLLOW, d => broadcast({ type: 'follow', user: normUser(d.user) }));
   conn.on(WebcastEvent.SHARE, d => broadcast({ type: 'share', user: normUser(d.user) }));
   conn.on(WebcastEvent.GIFT, d => {
-    const g = d.giftDetails || {};
-    // Streakable gifts (giftType 1) fire repeatedly; only count the final event.
-    if (g.giftType === 1 && !d.repeatEnd) return;
+    const g = d.gift || {}, old = d.giftDetails || {};
+    const giftType = g.type ?? old.giftType;
+    const user = normUser(d.user);
+    const { count, prev, total } = giftCount(`${user.id}:${d.groupId || d.giftId}`, giftType === 1, d.repeatCount, d.repeatEnd);
+    if (count <= 0) return;
+    // diamondCount = the gift's price in coins (what the viewer paid)
     broadcast({
       type: 'gift',
-      user: normUser(d.user),
-      giftName: g.giftName || `Gift #${d.giftId}`,
-      giftImage: g.giftImage?.giftPictureUrl || '',
-      diamonds: g.diamondCount || 1,
-      count: d.repeatCount || 1,
+      user,
+      giftName: g.name || old.giftName || `Gift #${d.giftId}`,
+      giftImage: g.image?.urlList?.[0] || old.giftImage?.giftPictureUrl || '',
+      diamonds: g.diamondCount ?? old.diamondCount ?? 1,
+      count,
+      comboPrev: prev,   // gifts of this combo already sent earlier
+      comboTotal: total, // combo total so far (for event thresholds)
     });
   });
   conn.on(WebcastEvent.STREAM_END, () => { console.log('Stream ended'); broadcast({ type: 'status', text: 'ended' }); });
@@ -144,6 +174,7 @@ function startDemo() {
   if (FISHING) return startFishingDemo(pick);
   if (BATTLE) return startBattleDemo(pick);
   if (RACE) return startRaceDemo(pick);
+  if (POND || SEA) return startPondDemo(pick);
 
   setInterval(() => {
     const r = Math.random();
@@ -230,6 +261,25 @@ function startRaceDemo(pick) {
     else if (r < 0.8) broadcast({ type: 'like', user: u, count: 5 });
     else { const [giftName, diamonds] = pick(gifts); broadcast({ type: 'gift', user: u, giftName, giftImage: '', diamonds, count: 1 }); }
   }, 450);
+}
+
+function startPondDemo(pick) {
+  const first = ['たか', 'ゆう', 'さく', 'はる', 'みゆ', 'そう', 'ひな', 'あお', 'れん', 'ゆな', 'こは', 'だい', 'まお', 'りく', 'めい'];
+  const users = Array.from({ length: 30 }, (_, i) => ({ id: 'p' + i, uniqueId: 'p' + i, nickname: first[i % 15] + (i >= 15 ? 'ちゃん' : 'くん'), avatar: `https://i.pravatar.cc/128?img=${i + 31}` }));
+  // Weighted: cheap gifts common, big ones rare
+  const gifts = [['バラ', 1], ['バラ', 1], ['バラ', 1], ['指ハート', 5], ['ドーナツ', 30], ['帽子とひげ', 99], ['コーギー', 299], ['流れ星', 699], ['花火', 1088]];
+  const active = [];
+  setInterval(() => {
+    const r = Math.random();
+    if (active.length < 6 || r < 0.15) {
+      const u = users.find(x => !active.includes(x));
+      if (u) { active.push(u); broadcast({ type: 'chat', user: u, text: pick(['参加！', '釣りたい！', 'やる！']) }); return; }
+    }
+    const u = pick(active);
+    if (r < 0.75) broadcast({ type: 'like', user: u, count: 10 + Math.floor(Math.random() * 20) });
+    else if (r < 0.9) broadcast({ type: 'chat', user: u, text: pick(['釣れた！', 'でかい！', 'いいな〜', '頑張れ']) });
+    else { const [giftName, diamonds] = pick(gifts); broadcast({ type: 'gift', user: u, giftName, giftImage: '', diamonds, count: 1 }); }
+  }, 700);
 }
 
 server.listen(PORT, () => {

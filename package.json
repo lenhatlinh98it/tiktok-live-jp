@@ -10,7 +10,9 @@
     "demo:wedding": "node server.js --demo --wedding",
     "demo:fishing": "node server.js --demo --fishing",
     "demo:battle": "node server.js --demo --battle",
-    "demo:race": "node server.js --demo --race"
+    "demo:race": "node server.js --demo --race",
+    "demo:pond": "node server.js --demo --pond",
+    "demo:sea": "node server.js --demo --sea"
   },
   "keywords": [],
   "author": "",

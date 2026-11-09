@@ -1,0 +1,49 @@
+/* Layout overrides on top of pond.css for the boat-at-sea scene */
+#stage { background: #0a2a4a; }
+.sea-bg { position: absolute; inset: 0; background: url('sea/bg.jpg') center / cover no-repeat; }
+#under, #over { position: absolute; inset: 0; width: 1080px; height: 1920px; pointer-events: none; }
+#under { z-index: 2; }
+#over { z-index: 8; }
+.tint { position: absolute; left: 0; right: 0; top: 505px; bottom: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity .8s, background .8s; mix-blend-mode: screen; }
+.tint.golden { opacity: .14; background: radial-gradient(ellipse at 50% 20%, rgba(255,215,90,.9), rgba(255,170,40,.25) 60%, transparent); }
+.tint.chum { opacity: .14; background: radial-gradient(ellipse at 50% 30%, rgba(120,255,190,.8), rgba(40,200,160,.2) 60%, transparent); }
+
+/* Boat (moved by JS for bobbing) */
+.boat { position: absolute; left: 40px; top: 0; width: 1000px; height: 333px; z-index: 6; transform-origin: 50% 80%; will-change: transform; }
+.boat > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+#seats { position: absolute; inset: 0; }
+.seat { position: absolute; width: 0; height: 0; }
+.seat .av { position: absolute; left: -34px; top: -78px; width: 68px; height: 68px; border-radius: 50%; overflow: hidden; border: 4px solid var(--ring, #fff);
+  background: #f1d7b5; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 28px; color: #444; box-shadow: 0 4px 10px rgba(0,0,0,.45); }
+.seat .av img { width: 100%; height: 100%; object-fit: cover; }
+.seat .rod { position: absolute; left: 14px; top: -66px; width: 4px; height: 92px; background: linear-gradient(#2a2a2a, #8b5a2b); transform-origin: 50% 100%; transform: rotate(38deg); border-radius: 2px; }
+.seat .tag { position: absolute; left: 50%; top: -8px; transform: translateX(-50%); white-space: nowrap; font-size: 15px; font-weight: 900; padding: 0 7px; border-radius: 8px;
+  background: rgba(8,20,36,.85); border: 2px solid var(--ring, rgba(255,255,255,.6)); text-align: center; line-height: 1.2; }
+.seat .tag small { display: block; font-size: 12px; }
+.seat.back { z-index: 0; }
+.seat.front { z-index: 1; }
+.seat.fight .av { animation: tug .18s ease-in-out infinite alternate; }
+@keyframes tug { to { transform: translateY(5px) rotate(4deg); } }
+.seat.fight .rod { animation: bend .18s ease-in-out infinite alternate; }
+@keyframes bend { to { transform: rotate(60deg); } }
+
+/* HUD: compact panels in the sky corners, title in the middle */
+.title { top: 14px; font-size: 64px; }
+.hud { top: 14px; left: 14px; right: 14px; }
+.panel { width: 300px; font-size: 18px; padding: 8px 12px; background: rgba(8,20,36,.72); }
+.panel .ptitle { font-size: 18px; }
+#rank { font-size: 17px; }
+#feed { font-size: 15px; }
+.record { font-size: 18px; }
+.golden { top: 104px; left: 330px; right: 330px; }
+.gtext { font-size: 19px; }
+.gbar { height: 14px; }
+#banner { top: 560px; }
+#card { top: 700px; }
+.legend { min-height: 0; }
+.odds-note { margin-top: 6px; font-size: 16px; text-align: center; color: #ffd9f0; }
+.escape { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font-size: 22px; font-weight: 900; color: #fff; padding: 4px 12px; border-radius: 12px;
+  background: linear-gradient(90deg, #3a3a4a, #6a6a7a); box-shadow: 0 4px 12px rgba(0,0,0,.4); z-index: 12; animation: catchUp 2.4s ease-out forwards; }
+#stage.quake { animation: quake .45s linear 4; }
+@keyframes quake { 25% { margin-left: -14px; margin-top: 6px; } 75% { margin-left: 14px; margin-top: -6px; } }
+.legend .gear-grid div { font-size: 18px; }

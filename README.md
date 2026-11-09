@@ -14,6 +14,62 @@ Overlay cho phiên live TikTok dạng "đi chùa online":
 - **28 chỗ ngồi**: khi đầy, người không tương tác lâu nhất sẽ đứng dậy đi ra để nhường chỗ.
 - Cấp hiệu ứng quà (💎 × số lượng): `<10` nhỏ · `10–99` mưa sen · `100–999` + hào quang · `≥1000` hào quang kép.
 
+## Overlay 「釣り船ライブ」 – thuyền câu ra biển (`/sea.html`, 2D canvas) ⭐ bản mới nhất
+
+Cùng toàn bộ cơ chế của 「釣り堀ライブ」 (bên dưới), đổi sang góc nhìn mặt cắt ngang biển:
+- Nền `public/sea/bg.jpg` và thuyền `public/sea/boat.png` (tạo bằng AI). Thuyền bập bềnh trên mặt nước.
+- **16 chỗ** trên boong (2 hàng so le). Mỗi người có cần câu; dây câu thả xuống **độ sâu theo độ hiếm** của con cá sắp cắn (★1 nông → ★5 sát đáy).
+- Cá dùng ảnh thật trong `public/fish/` (**37 loài**: rác 3, ★1 9, ★2 8, ★3 8, ★4 5, ★5 4 – tạo bằng AI từ 2 sheet), bơi ngang theo tầng; ★3+ phát sáng.
+- Mồi đang dùng hiện ở cuối dây khi chờ cá (🦐/🪱/🦑/tôm vàng/ngọc cầu vồng); mồi trả phí phát sáng + lấp lánh; nhận quà có hiệu ứng「装着！」. Cá bơi tới móc → cắn → ファイト (người câu rung theo) → kéo dọc dây lên mặt nước → nhảy lên thuyền.
+- 黄金タイム / 撒き餌 phủ màu lên vùng nước; 撒き餌 thêm đàn cá và bọt nước.
+- Đơn vị quà là **coin** (số coin người xem trả cho món quà). Thư viện gọi trường này là `diamondCount` / `diamond_count`, nhưng README của thư viện dùng nó làm giá quà (`cost`). Các bảng 💎 trong README này cũng hiểu là coin.
+- **Quà = mồi + cần** (khác bản hồ):
+
+| 💎 | Mồi (quyết định cá nào cắn) | Cần (giảm tỉ lệ xổng) |
+|---|---|---|
+| 1–9 | 🪱 特製エサ ×5 – không ra rác | — |
+| 10–99 | 🦑 高級エサ ×5 – ★2 trở lên | 🎣 カーボン竿 ×10 – xổng ×0.6 |
+| 100–499 | ✨ 金のエサ ×5 – ★3 trở lên | 🥇 金の竿 ×15 – xổng ×0.35 |
+| ≥500 | 👑 伝説のエサ ×3 – ★4 trở lên | 🔱 伝説の竿 ×10 – xổng ×0.15 |
+
+- **Cá xổng (バラシ):** tỉ lệ cơ bản ★1 15% → ★5 55%, nhân với hệ số của cần. Xổng thì dây đứt「プツン」, cá phóng đi; ★4/★5 xổng có banner gợi ý cần xịn. **Mồi trả phí không bị trừ khi cá xổng** (chỉ trừ khi câu được); cần bị trừ mỗi lần câu.
+- **巨大魚の群れ (quà ≥1000💎):** rung màn hình, đàn cá khủng tràn qua, **mọi người trên thuyền đều bị cá cắn** (★3 60% / ★4 32% / ★5 8%, miễn phí cho người được hưởng) → mỗi người tự giữ cá bằng cần của mình → banner tổng kết「大漁！N人中M人が釣り上げた！」.
+
+```bash
+npm run demo:sea
+```
+
+Live thật: `node server.js ten_tiktok --sea`.
+
+## Overlay 3D 「釣り堀ライブ」 – hồ câu cá (`/pond.html`, Three.js)
+
+- Comment bất kỳ → ngồi vào 1 trong **24 chỗ** quanh hồ (rải đều), hiện avatar + tên + đồ câu đang dùng + số loài trong 図鑑.
+- Người đã ngồi **tự động câu liên tục**: chờ (phao thỉnh thoảng nhúc nhích「ちょん…」) → cá có màu theo độ hiếm bơi tới phao → phao giật「!」→ kéo cá「ファイト！」→ cá nhảy lên về phía người câu → nhãn kết quả. Chỉ ★4/★5 hiện thẻ lớn giữa màn hình (có pháo giấy).
+- Thời gian chờ theo độ hiếm của cá sắp cắn: ★1 20–40s, ★2 30–55s, ★3 45–75s, ★4 60–100s, ★5 80–130s (rác 15–35s). Thời gian kéo cá: ★1 ~1s → ★5 ~5s. 特製エサ chờ ×0.75, cần trả phí ×0.85. Lần câu đầu sau khi ngồi chờ một nửa. `?speed=3` để test nhanh.
+- 22 loại (rác, ★1–★5). Điểm = điểm theo độ hiếm × kích thước. Bảng 「今日のランキング」 và 「最大魚レコード」 lưu theo ngày (localStorage của trình duyệt).
+- **Đồ câu từ quà** (mỗi mức bảo đảm độ hiếm tối thiểu, không ra rác; bảng tỉ lệ luôn hiện xen kẽ ở dưới màn hình):
+
+| 💎 | Đồ câu | Số lần | Bảo đảm |
+|---|---|---|---|
+| Miễn phí | 🎋 竹竿 | ∞ | — (có thể ra rác) |
+| 1–9 | 🪱 特製エサ | 5 | Không ra rác, cắn câu nhanh hơn |
+| 10–99 | 🎣 カーボン竿 | 10 | ★2 trở lên |
+| 100–499 | ✨ 金の竿 | 10 | ★3 trở lên |
+| ≥500 | 👑 伝説の竿 | 5 | ★4 trở lên |
+
+- Ảnh cá: `public/fish/<tên>.png` (PNG nền trong suốt, cắt từ sheet tạo bằng AI). Thay ảnh chỉ cần ghi đè file cùng tên; loài nào thiếu ảnh sẽ tự dùng emoji. Bảng tên file ↔ loài nằm ở `FISH_IMG` trong `public/pond.js`.
+- **Quà = 即ヒット:** người tặng đang chờ thì cá cắn câu ngay, và lần câu đó dùng luôn đồ câu mới.
+- **撒き餌 (quà ≥100💎):** đàn cá kéo tới, mặt nước sủi bọt, 20 giây cả hồ chờ ngắn hơn 60%, banner ghi tên người tặng.
+- **黄金タイム:** thanh chung nhận cả like và quà (1💎 = 10 like), đầy 500 (`?golden=`) → 30 giây cả hồ chờ còn một nửa, banner vinh danh người góp nhiều nhất (không đổi tỉ lệ cá).
+- Khi đủ 24 chỗ, người dùng đồ miễn phí không tương tác 10 phút sẽ nhường chỗ.
+- ⚠️ Cơ chế "quà → tỉ lệ cá hiếm cao hơn" cần luật sư xác nhận trước khi chạy ở Nhật (賭博罪 / 景品表示法).
+
+```bash
+npm run demo:pond
+```
+
+Live thật: `node server.js ten_tiktok --pond`.
+
 ## Overlay 3D 「ビー玉レース」 – đua bi (`/race.html`, Three.js)
 
 - **Phòng chờ (mặc định 20 giây):** comment bất kỳ → viên bi thủy tinh mang avatar xếp hàng ở vạch START.
@@ -141,6 +197,19 @@ Mở `http://localhost:8787/` để xem. Đổi tiêu đề: `http://localhost:8
 3. Đặt source này lên trên cùng (hoặc làm nền, rồi đặt camera lên trên).
 
 Với TikTok LIVE Studio: thêm source loại **Link / Browser** với URL như trên.
+
+## Kiểm tra dữ liệu live thật (chỉ đọc)
+
+```bash
+node scripts/probe.js <username_dang_live> 120
+```
+
+In cấu trúc vài sự kiện mỗi loại (đã che chuỗi) và thử proxy avatar. Kết quả kiểm tra ngày 2026-11-09 với `tiktok-live-connector` 2.5.0:
+- Thư viện bắt buộc truyền options: `new TikTokLiveConnection(user, {})` (không có `{}` sẽ crash).
+- Dữ liệu là proto thô: user `id` / `displayId` / `nickname` / `avatarThumb.urlList`; chat `content`; like `count`; quà `gift.name` / `gift.diamondCount` (= giá coin) / `gift.type` / `gift.image.urlList`, `repeatCount`, `repeatEnd`.
+- Avatar đến từ `p16/p19-common-sign.tiktokcdn.com`, proxy `/avatar` tải được (HTTP 200, webp).
+- **Quà đã xác nhận với live thật:** `gift.diamondCount` = giá coin (Finger Heart 5, Rosa 10, Cap 99, Rose 1). Quà combo (`gift.type` = 1) gửi 1 sự kiện lúc bắt đầu (`repeatEnd: 0`) và 1 sự kiện lúc kết thúc (`repeatEnd: 1`, ~3–4 giây sau, cùng `groupId`). Server phát ngay ở sự kiện đầu rồi chỉ cộng phần thêm khi kết thúc; gửi kèm `comboPrev` / `comboTotal` để overlay kích hoạt 撒き餌 / 巨大魚の群れ khi tổng combo vượt ngưỡng (1 lần mỗi combo).
+- **Giới hạn tần suất:** dịch vụ ký request của thư viện giới hạn số kết nối mỗi phút (`rate_limit_account_minute`). 1 server = 1 kết nối thì không sao; tránh mở nhiều kết nối cùng lúc khi test.
 
 ## Lưu ý
 

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fishing Boat Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800;900&family=Yuji+Syuku&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pond.css">
+<link rel="stylesheet" href="sea.css">
+</head>
+<body>
+<div id="stage">
+  <div class="sea-bg"></div>
+  <canvas id="under" width="1080" height="1920"></canvas>
+  <div id="tint" class="tint"></div>
+  <div id="boat" class="boat">
+    <img src="sea/boat.png" alt="">
+    <div id="seats"></div>
+  </div>
+  <canvas id="over" width="1080" height="1920"></canvas>
+  <div id="flash" class="flash"></div>
+
+  <div class="title">釣り船ライブ</div>
+  <div class="hud">
+    <div class="panel">
+      <div class="ptitle">🏆 今日のランキング</div>
+      <ol id="rank"></ol>
+    </div>
+    <div class="panel">
+      <div class="ptitle">🐟 最大魚レコード</div>
+      <div id="record" class="record">—</div>
+      <div class="ptitle small">最近の大物</div>
+      <ul id="feed"></ul>
+    </div>
+  </div>
+  <div class="golden">
+    <div class="gtext" id="gtext"></div>
+    <div class="gbar"><i id="gbar"></i></div>
+  </div>
+
+  <div id="labels"></div>
+  <div id="banner"></div>
+  <div id="card"></div>
+
+  <div class="legend">
+    <div class="lg-how" id="lgHow">
+      <div class="row"><b>💬 コメントで乗船！</b> 自動で釣り続けます ・ 最大16人</div>
+      <div class="row gift-row">🎁 ギフトで<b>即ヒット</b> ・ <b>100コイン〜</b>撒き餌（20秒爆釣） ・ <b>1000コイン〜</b>🐋<b>巨大魚の群れ</b>（全員にヒット）</div>
+      <div class="gear-grid">
+        <div><span>1〜9コイン</span>🪱特製エサ×5 ゴミなし</div>
+        <div><span>10〜99コイン</span>🦑高級エサ★2↑ ＋ 🎣カーボン竿</div>
+        <div><span>100〜499コイン</span>✨金のエサ★3↑ ＋ 🥇金の竿</div>
+        <div><span>500コイン〜</span>👑伝説のエサ★4↑ ＋ 🔱伝説の竿</div>
+        <div class="wide"><span>ルール</span>エサ＝釣れる魚 ・ 竿＝逃げられにくさ ・ 逃げられてもギフトのエサは減らない</div>
+      </div>
+    </div>
+    <div class="lg-odds" id="lgOdds"></div>
+  </div>
+  <div id="status"></div>
+</div>
+<script type="module" src="sea.js"></script>
+</body>
+</html>
