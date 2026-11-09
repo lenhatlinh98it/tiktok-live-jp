@@ -2,7 +2,13 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- "Add to Home Screen" opens without browser bars (iOS uses the apple-* meta, Android the manifest) -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="釣り船ライブ">
+<link rel="manifest" href="sea.webmanifest">
 <title>Fishing Boat Overlay</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800;900&family=Yuji+Syuku&display=swap" rel="stylesheet">
@@ -45,7 +51,7 @@
 
   <div class="legend">
     <div class="lg-how" id="lgHow">
-      <div class="row"><b>💬 コメントで乗船！</b> 自動で釣り続けます ・ 最大16人</div>
+      <div class="row"><b>👋 入室するだけで乗船！</b> 自動で釣り続けます ・ 満員時はコメントした人が優先</div>
       <div class="row gift-row">🎁 ギフトで<b>即ヒット</b> ・ <b>100コイン〜</b>撒き餌（20秒爆釣） ・ <b>1000コイン〜</b>🐋<b>巨大魚の群れ</b>（全員にヒット）</div>
       <div class="gear-grid">
         <div><span>1〜9コイン</span>🪱特製エサ×5 ゴミなし</div>

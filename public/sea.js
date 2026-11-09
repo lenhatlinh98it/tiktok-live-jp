@@ -14,6 +14,21 @@ function fit() {
 }
 addEventListener('resize', fit); fit();
 
+// Phone use (screen-share streaming): tap once to go fullscreen and hide the browser bars
+if (matchMedia('(pointer: coarse)').matches) {
+  const hint = document.createElement('div');
+  hint.className = 'fs-hint';
+  hint.textContent = 'タップで全画面';
+  document.body.appendChild(hint);
+  const goFull = () => {
+    const el = document.documentElement;
+    (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el)?.catch?.(() => {});
+    hint.remove();
+  };
+  addEventListener('click', goFull, { once: true });
+  addEventListener('fullscreenchange', fit);
+}
+
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -159,14 +174,19 @@ function saveStats() { try { localStorage.setItem('sea-' + DAY, JSON.stringify([
 let record = null;
 for (const s of stats.values()) if (s.best && (!record || s.best.size > record.fish.size)) record = { user: s.user, fish: s.best };
 
-function seat(user) {
+// passive = seated just for entering the room (no comment/like/gift yet).
+// When the boat is full, active viewers replace the earliest passive one; passive viewers only take free seats.
+function seat(user, passive = false) {
   let p = players.get(user.id);
-  if (p) { p.lastActive = Date.now(); return p; }
+  if (p) { if (!passive) { p.lastActive = Date.now(); p.passive = false; } return p; }
   let s = freeSeat();
   if (!s) {
-    const idle = [...players.values()].filter(q => Date.now() - q.lastActive > IDLE_MS && q.bait.id === 0 && q.rod.id === 0).sort((a, b) => a.lastActive - b.lastActive)[0];
-    if (!idle) return null;
-    unseat(idle);
+    if (passive) return null;
+    const all = [...players.values()];
+    const victim = all.filter(q => q.passive).sort((a, b) => a.lastActive - b.lastActive)[0]
+      || all.filter(q => Date.now() - q.lastActive > IDLE_MS && q.bait.id === 0 && q.rod.id === 0).sort((a, b) => a.lastActive - b.lastActive)[0];
+    if (!victim) return null;
+    unseat(victim);
     s = freeSeat();
   }
   const el = document.createElement('div');
@@ -177,7 +197,7 @@ function seat(user) {
   $('#seats').appendChild(el);
   const tip = rodTip(s);
   p = { user, seat: s, el, bait: BAITS[0], baitLeft: Infinity, rod: RODS[0], rodLeft: Infinity, state: 'idle', lastActive: Date.now(), token: 0, seenBoosts: new Set(), skip: false, frenzy: false,
-    hook: { x: tip.x + rand(-10, 30), y: tip.y, targetY: tip.y }, nibbleAt: 0 };
+    hook: { x: tip.x + rand(-10, 30), y: tip.y, targetY: tip.y }, nibbleAt: 0, passive };
   s.player = p;
   players.set(user.id, p);
   if (!stats.has(user.id)) stats.set(user.id, { user, pts: 0, best: null, dex: new Set() });
@@ -705,8 +725,10 @@ function onGift(e) {
 const handlers = {
   chat: e => { const p = seat(e.user); if (p) p.lastActive = Date.now(); },
   gift: onGift,
-  like: e => { const p = players.get(e.user.id); if (p) p.lastActive = Date.now(); addGauge(e.user, e.count || 1); },
-  join: () => {}, share: () => {},
+  like: e => { const p = players.get(e.user.id); if (p) { p.lastActive = Date.now(); p.passive = false; } addGauge(e.user, e.count || 1); },
+  // Entering the room is enough to board while there are free seats
+  join: e => seat(e.user, true),
+  share: () => {},
   follow: e => banner(e.user, `<div class="av"></div><div><div class="who">${esc(e.user.nickname)}</div><div class="what">フォローありがとう！</div></div>`, '', 2000),
   config: () => {},
 };

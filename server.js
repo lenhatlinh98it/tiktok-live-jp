@@ -53,7 +53,7 @@ async function proxyAvatar(req, res) {
 }
 
 // ---------- Static file server ----------
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.json': 'application/json' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.json': 'application/json', '.webmanifest': 'application/manifest+json' };
 
 const server = http.createServer((req, res) => {
   const urlPath = decodeURIComponent(new URL(req.url, 'http://x').pathname);
@@ -77,9 +77,18 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 if (DEMO && WEDDING) wss.on('connection', ws => ws.send(JSON.stringify({ type: 'config', interval: 40 })));
 if (DEMO && FISHING) wss.on('connection', ws => ws.send(JSON.stringify({ type: 'config', bossInterval: 45, autoreel: true })));
 if (DEMO && RACE) wss.on('connection', ws => ws.send(JSON.stringify({ type: 'config', lobby: 12 })));
+// --verbose: print one line per live event (helps check what TikTok actually sends)
+const VERBOSE = args.includes('--verbose');
+const ICONS = { join: '👋', chat: '💬', like: '❤️', gift: '🎁', follow: '➕', share: '🔁' };
 function broadcast(evt) {
   const msg = JSON.stringify(evt);
-  for (const c of wss.clients) if (c.readyState === 1) c.send(msg);
+  let clients = 0;
+  for (const c of wss.clients) if (c.readyState === 1) { c.send(msg); clients++; }
+  if (VERBOSE && !DEMO && ICONS[evt.type]) {
+    const who = evt.user?.id ? evt.user.nickname : '(no id → ignored by overlay)';
+    const extra = evt.type === 'chat' ? `: ${evt.text}` : evt.type === 'gift' ? `: ${evt.giftName} x${evt.count} (${evt.diamonds} coins)` : evt.type === 'like' ? ` x${evt.count}` : '';
+    console.log(`${ICONS[evt.type]} ${evt.type} ${who}${extra}  [overlay pages: ${clients}]`);
+  }
 }
 
 // ---------- Normalize TikTok payloads ----------
@@ -116,18 +125,42 @@ function giftCount(key, streak, repeatCount, repeatEnd) {
 }
 
 function connectTikTok(username) {
-  // v2.5.0 requires an options object (crashes on undefined)
-  const conn = new TikTokLiveConnection(username, {});
   let retry = 0;
+  let current = null;
+  let reconnectTimer = null;
 
-  const connect = () => conn.connect()
-    .then(state => { retry = 0; console.log(`✅ Connected @${username} (roomId ${state.roomId})`); broadcast({ type: 'status', text: 'connected' }); })
-    .catch(err => {
-      const wait = Math.min(60, 5 * ++retry);
-      console.error(`❌ Connect failed: ${err?.message || err}. Retry in ${wait}s`);
-      setTimeout(connect, wait * 1000);
+  // Each attempt uses a brand-new connection object; the old one is torn down first
+  const scheduleReconnect = (why, seconds) => {
+    if (reconnectTimer) return;
+    console.log(`↻ ${why}. Reconnecting in ${seconds}s`);
+    reconnectTimer = setTimeout(() => { reconnectTimer = null; start(); }, seconds * 1000);
+  };
+  const start = () => {
+    if (current) { try { current.removeAllListeners(); current.disconnect()?.catch?.(() => {}); } catch { /* already closed */ } }
+    // v2.5.0 requires an options object (crashes on undefined)
+    const conn = new TikTokLiveConnection(username, {});
+    current = conn;
+    attach(conn);
+    conn.on(WebcastEvent.STREAM_END, () => { console.log('Stream ended'); broadcast({ type: 'status', text: 'ended' }); scheduleReconnect('Waiting for the next live', 15); });
+    conn.on('disconnected', () => { if (current === conn) scheduleReconnect('Disconnected', 5); });
+    conn.on('error', err => {
+      const msg = err?.exception?.message || err?.message || err?.info || String(err);
+      if (!/isn't online/.test(msg)) console.error('⚠️ Connection error:', msg); // offline is reported by the connect() handler
     });
+    conn.connect()
+      .then(state => { retry = 0; console.log(`✅ Connected @${username} (roomId ${state.roomId})`); broadcast({ type: 'status', text: 'connected' }); })
+      .catch(err => {
+        // Poll every 10s while waiting for the live to start, so viewers who join early are not missed
+        const wait = Math.min(10, 5 * ++retry);
+        console.error(`❌ Connect failed: ${err?.message || err}`);
+        scheduleReconnect('Not live yet or connection failed', wait);
+      });
+  };
+  start();
+}
 
+// Event handlers for one connection
+function attach(conn) {
   conn.on(WebcastEvent.MEMBER, d => broadcast({ type: 'join', user: normUser(d.user) }));
   conn.on(WebcastEvent.CHAT, d => broadcast({ type: 'chat', user: normUser(d.user), text: d.content ?? d.comment ?? '' }));
   conn.on(WebcastEvent.LIKE, d => broadcast({ type: 'like', user: normUser(d.user), count: d.count ?? d.likeCount ?? 1 }));
@@ -151,11 +184,12 @@ function connectTikTok(username) {
       comboTotal: total, // combo total so far (for event thresholds)
     });
   });
-  conn.on(WebcastEvent.STREAM_END, () => { console.log('Stream ended'); broadcast({ type: 'status', text: 'ended' }); });
-  conn.on('disconnected', () => { console.log('Disconnected, reconnecting...'); setTimeout(connect, 5000); });
-
-  connect();
 }
+
+// Keep the overlay server alive during a stream and leave a trace if something goes wrong
+process.on('uncaughtException', err => console.error('⚠️ Uncaught exception:', err?.stack || err));
+process.on('unhandledRejection', err => console.error('⚠️ Unhandled rejection:', err?.stack || err));
+process.on('exit', code => console.log(`Server process exiting (code ${code})`));
 
 // ---------- Demo mode ----------
 function startDemo() {

@@ -1,4 +1,92 @@
-# TikTok Live – Chánh điện trực tuyến (overlay)
+# TikTok Live Overlay – 「釣り船ライブ」
+
+Game câu cá tương tác cho TikTok LIVE: người xem vào phòng là lên thuyền, tặng quà để có mồi và cần xịn.
+
+## 🚀 Chạy nhanh (Windows PowerShell)
+
+> Mọi lệnh dưới đây gõ trong **PowerShell**. Mỗi khối là một lệnh, chạy lần lượt.
+
+### Lần đầu trên một máy (chỉ làm 1 lần)
+
+Cần cài sẵn [Node.js](https://nodejs.org/) bản 18 trở lên và Git.
+
+```powershell
+git clone https://github.com/lenhatlinh98it/tiktok-live-jp.git
+```
+
+```powershell
+cd tiktok-live-jp
+```
+
+```powershell
+npm install
+```
+
+### Mỗi lần live
+
+**1. Mở PowerShell ở thư mục project** (nếu đang ở chỗ khác thì `cd` tới thư mục `tiktok-live-jp`):
+
+```powershell
+cd tiktok-live-jp
+```
+
+**2. Chạy server** (thay `kawaya_tips` bằng username TikTok của bạn nếu khác). Chạy **trước** khi bắt đầu live, server sẽ tự chờ và kết nối khi live bắt đầu:
+
+```powershell
+$env:PORT = '8790'; node server.js kawaya_tips --sea --verbose
+```
+
+- `--verbose`: in từng sự kiện (👋 vào phòng, 💬 comment, ❤️ like, 🎁 quà). `overlay pages: 1` = điện thoại đang nhận sự kiện; `0` = chưa có trang game nào mở.
+- Dừng server: bấm `Ctrl + C`.
+
+**3. Tìm địa chỉ IP của máy tính** (mở thêm một cửa sổ PowerShell khác):
+
+```powershell
+ipconfig
+```
+
+Lấy dòng `IPv4 Address` của mục **Wi-Fi**, ví dụ `192.168.3.121`.
+
+**4. Mở game trên điện thoại** (điện thoại và máy tính **cùng một Wi-Fi**), vào Chrome:
+
+```
+http://<IP-máy-tính>:8790/
+```
+
+- Chạm 1 lần để toàn màn hình (Android). iPhone: dùng "Thêm vào màn hình chính" rồi mở từ icon.
+- Nếu đã mở trang từ trước → **tải lại trang** để chắc chắn chạy bản mới nhất.
+- Lần đầu Windows có thể hỏi cho phép Node.js qua tường lửa → chọn **Cho phép**.
+
+**5. Bắt đầu live trên app TikTok** ở chế độ **phát màn hình** (chọn trò chơi bất kỳ / 「その他」), rồi chuyển sang Chrome đang mở game.
+
+**6. Chờ terminal hiện** `✅ Connected @kawaya_tips` → lúc này người xem vào phòng sẽ tự lên thuyền.
+
+**Trước khi live:** tắt tự khoá màn hình điện thoại và bật chế độ Không làm phiền (thông báo sẽ bị phát lên live).
+
+### Thử khi không live (dữ liệu giả)
+
+```powershell
+npm run demo:sea
+```
+
+Mở `http://localhost:8787/` trên máy tính (hoặc `http://<IP-máy-tính>:8787/` trên điện thoại). Người xem giả sẽ tự comment, like, tặng quà.
+
+### Gỡ lỗi nhanh
+
+| Hiện tượng | Nguyên nhân / cách xử lý |
+|---|---|
+| `Cannot find module ...\server.js` | Chưa `cd` vào thư mục `tiktok-live-jp` |
+| `The '<' operator is reserved` | Còn chữ giữ chỗ `<...>` trong lệnh, thay bằng username thật |
+| `isn't online` / `Failed to retrieve Room ID` | Tài khoản chưa live – bình thường, server tự thử lại mỗi 10 giây |
+| `Rate Limited` | Kết nối quá nhiều lần trong 1 phút – chờ 1 phút |
+| Điện thoại không mở được trang | Kiểm tra cùng Wi-Fi, đúng IP (`ipconfig`), đúng cổng `8790`, tường lửa đã cho phép Node.js |
+| Người vào phòng không lên thuyền | Xem terminal có dòng `👋 join <tên>` không, và `overlay pages` có ≥ 1 không. Người vào phòng **trước** khi hiện `Connected` sẽ không được tính – họ comment là lên thuyền |
+
+---
+
+# Các overlay khác (bản thử nghiệm trước)
+
+## Chánh điện trực tuyến (`/overlay.html`)
 
 Overlay cho phiên live TikTok dạng "đi chùa online":
 

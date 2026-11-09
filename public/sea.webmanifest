@@ -1,0 +1,9 @@
+{
+  "name": "釣り船ライブ",
+  "short_name": "釣り船",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0a2a4a",
+  "theme_color": "#0a2a4a"
+}
