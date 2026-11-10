@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sea-demo",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["server.js", "--demo", "--sea"],
+      "port": 8787
+    }
+  ]
+}

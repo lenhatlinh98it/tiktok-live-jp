@@ -6,28 +6,17 @@ const stage = $('#stage');
 const GOLDEN_GOAL = Math.max(10, Number(params.get('golden')) || 500);
 const GOLDEN_SEC = 30;
 const IDLE_MS = 10 * 60 * 1000;
+const PASSIVE_SEATS = 10; // seats viewers can get just by entering the room
+const VIP_SLOTS = 3; // seated top gifters shown with a big avatar
 const SPEED = Math.max(0.1, Number(params.get('speed')) || 1); // >1 = faster (testing only)
 
 function fit() {
-  const s = Math.min(innerWidth / W, innerHeight / H);
-  stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+  // Keep the stage below the phone status bar (iOS home-screen app draws under it)
+  const top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-top')) || 0;
+  const s = Math.min(innerWidth / W, (innerHeight - top) / H);
+  stage.style.transform = `translate(-50%, -50%) translateY(${top / 2}px) scale(${s})`;
 }
 addEventListener('resize', fit); fit();
-
-// Phone use (screen-share streaming): tap once to go fullscreen and hide the browser bars
-if (matchMedia('(pointer: coarse)').matches) {
-  const hint = document.createElement('div');
-  hint.className = 'fs-hint';
-  hint.textContent = 'タップで全画面';
-  document.body.appendChild(hint);
-  const goFull = () => {
-    const el = document.documentElement;
-    (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el)?.catch?.(() => {});
-    hint.remove();
-  };
-  addEventListener('click', goFull, { once: true });
-  addEventListener('fullscreenchange', fit);
-}
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -155,7 +144,7 @@ const boatEl = $('#boat');
 let bobY = 0, bobR = 0;
 const SEATS = [];
 for (let i = 0; i < 8; i++) SEATS.push({ x: 330 + i * 86, base: 240, row: 'front' });
-for (let i = 0; i < 8; i++) SEATS.push({ x: 373 + i * 86, base: 168, row: 'back' });
+for (let i = 0; i < 8; i++) SEATS.push({ x: 373 + i * 86, base: 122, row: 'back' }); // high enough that front-row avatars do not cover back-row tags
 SEATS.forEach((s, i) => { s.i = i; s.player = null; });
 // Fill seats spread along the deck
 const byX = [...SEATS].sort((a, b) => a.x - b.x);
@@ -175,13 +164,14 @@ let record = null;
 for (const s of stats.values()) if (s.best && (!record || s.best.size > record.fish.size)) record = { user: s.user, fish: s.best };
 
 // passive = seated just for entering the room (no comment/like/gift yet).
-// When the boat is full, active viewers replace the earliest passive one; passive viewers only take free seats.
+// Passive viewers take at most PASSIVE_SEATS free seats; the rest are kept for active viewers.
+// When the boat is full, active viewers replace the earliest passive one.
 function seat(user, passive = false) {
   let p = players.get(user.id);
   if (p) { if (!passive) { p.lastActive = Date.now(); p.passive = false; } return p; }
   let s = freeSeat();
+  if (passive && (!s || [...players.values()].filter(q => q.passive).length >= PASSIVE_SEATS)) return null;
   if (!s) {
-    if (passive) return null;
     const all = [...players.values()];
     const victim = all.filter(q => q.passive).sort((a, b) => a.lastActive - b.lastActive)[0]
       || all.filter(q => Date.now() - q.lastActive > IDLE_MS && q.bait.id === 0 && q.rod.id === 0).sort((a, b) => a.lastActive - b.lastActive)[0];
@@ -203,15 +193,21 @@ function seat(user, passive = false) {
   if (!stats.has(user.id)) stats.set(user.id, { user, pts: 0, best: null, dex: new Set() });
   stats.get(user.id).user = user;
   updateTag(p);
+  updateVips();
   fishLoop(p);
   return p;
+}
+// Big avatar for the seated viewers who gifted the most coins today
+function updateVips() {
+  const top = [...players.values()].filter(q => stats.get(q.user.id)?.gifted > 0)
+    .sort((a, b) => stats.get(b.user.id).gifted - stats.get(a.user.id).gifted).slice(0, VIP_SLOTS);
+  for (const q of players.values()) q.el.classList.toggle('vip', top.includes(q));
 }
 function unseat(p) { p.token++; p.seat.player = null; players.delete(p.user.id); p.el.remove(); }
 function updateTag(p) {
   const st = stats.get(p.user.id);
   const name = p.user.nickname.length > 6 ? p.user.nickname.slice(0, 6) + '…' : p.user.nickname;
-  p.el.style.setProperty('--ring', BAIT_RING[p.bait.id]);
-  const b = p.bait.icon + (p.bait.id ? p.baitLeft : '');
+  p.el.style.setProperty('--ring', BAIT_RING[p.bait.id]);  const b = p.bait.icon + (p.bait.id ? p.baitLeft : '');
   const r = p.rod.icon + (p.rod.id ? p.rodLeft : '');
   p.el.querySelector('.tag').innerHTML = `${esc(name)}<small>${b} ${r} 📖${st ? st.dex.size : 0}</small>`;
 }
@@ -701,6 +697,9 @@ function onGift(e) {
   const p = seat(e.user);
   if (!p) { banner(e.user, `<div class="av"></div><div><div class="who">${esc(e.user.nickname)}</div><div class="what">${esc(e.giftName)} ありがとう！（満員）</div></div>`, '', 2000); return; }
   p.lastActive = Date.now();
+  const st = stats.get(e.user.id);
+  st.gifted = (st.gifted || 0) + total;
+  updateVips();
   addItem(p, 'bait', bait);
   addItem(p, 'rod', rod);
   // Visual feedback on the hook: burst ring + label
@@ -732,6 +731,67 @@ const handlers = {
   follow: e => banner(e.user, `<div class="av"></div><div><div class="who">${esc(e.user.nickname)}</div><div class="what">フォローありがとう！</div></div>`, '', 2000),
   config: () => {},
 };
+
+// ---------- Background music (generated in the browser, no audio files) ----------
+// Sea waves (filtered noise) + a slow pentatonic melody over a bass note.
+// Browsers only allow sound after a user gesture, so it starts on the first tap. ?bgm=0 turns it off.
+function startBgm() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  const ac = new AC();
+  const master = ac.createGain();
+  master.gain.value = 0.5;
+  master.connect(ac.destination);
+
+  // Waves: looped white noise through a low-pass filter, volume swelling slowly
+  const buf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const noise = ac.createBufferSource();
+  noise.buffer = buf; noise.loop = true;
+  const lowpass = ac.createBiquadFilter();
+  lowpass.type = 'lowpass'; lowpass.frequency.value = 500;
+  const waveGain = ac.createGain();
+  waveGain.gain.value = 0.12;
+  const swell = ac.createOscillator(), swellDepth = ac.createGain();
+  swell.frequency.value = 0.12; swellDepth.gain.value = 0.08;
+  swell.connect(swellDepth).connect(waveGain.gain);
+  noise.connect(lowpass).connect(waveGain).connect(master);
+  noise.start(); swell.start();
+
+  // One soft note with a short attack and a long fade
+  const tone = (semitone, at, dur, vol, type) => {
+    const osc = ac.createOscillator(), g = ac.createGain();
+    osc.type = type;
+    osc.frequency.value = 261.63 * 2 ** (semitone / 12);
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(vol, at + 0.2);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    osc.connect(g).connect(master);
+    osc.start(at); osc.stop(at + dur + 0.05);
+  };
+  const SCALE = [0, 2, 4, 7, 9];  // C major pentatonic
+  const ROOTS = [0, -3, 5, 7];    // bass note per bar: C, A, F, G
+  const BEAT = 0.5;
+  let next = ac.currentTime + 0.1, step = 0, degree = 4;
+  setInterval(() => {
+    if (next < ac.currentTime) next = ac.currentTime + 0.05; // tab was in the background
+    while (next < ac.currentTime + 0.6) {
+      if (step % 8 === 0) {
+        const root = ROOTS[(step / 8) % ROOTS.length];
+        tone(root - 12, next, BEAT * 8, 0.14, 'sine');
+        tone(root - 5, next, BEAT * 8, 0.05, 'sine');
+      }
+      // Sparse, low and quiet so it sits under the waves
+      if (Math.random() < 0.4) {
+        degree = Math.max(0, Math.min(9, degree + pick([-2, -1, -1, 0, 1, 1, 2])));
+        tone(SCALE[degree % 5] + 12 * Math.floor(degree / 5) - 12, next, 2.5, 0.035, 'sine');
+      }
+      step++; next += BEAT;
+    }
+  }, 200);
+}
+if (params.get('bgm') !== '0') addEventListener('pointerdown', startBgm, { once: true });
 
 // ---------- WebSocket ----------
 const status = $('#status');

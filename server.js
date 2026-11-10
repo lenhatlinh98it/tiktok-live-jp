@@ -299,14 +299,16 @@ function startRaceDemo(pick) {
 
 function startPondDemo(pick) {
   const first = ['たか', 'ゆう', 'さく', 'はる', 'みゆ', 'そう', 'ひな', 'あお', 'れん', 'ゆな', 'こは', 'だい', 'まお', 'りく', 'めい'];
-  const users = Array.from({ length: 30 }, (_, i) => ({ id: 'p' + i, uniqueId: 'p' + i, nickname: first[i % 15] + (i >= 15 ? 'ちゃん' : 'くん'), avatar: `https://i.pravatar.cc/128?img=${i + 31}` }));
+  const users = Array.from({ length: 40 }, (_, i) => ({ id: 'p' + i, uniqueId: 'p' + i, nickname: first[i % 15] + (i >= 15 ? 'ちゃん' : 'くん'), avatar: `https://i.pravatar.cc/128?img=${i + 31}` }));
   // Weighted: cheap gifts common, big ones rare
   const gifts = [['バラ', 1], ['バラ', 1], ['バラ', 1], ['指ハート', 5], ['ドーナツ', 30], ['帽子とひげ', 99], ['コーギー', 299], ['流れ星', 699], ['花火', 1088]];
-  const active = [];
+  const active = [], lurkers = [];
   setInterval(() => {
     const r = Math.random();
-    if (active.length < 6 || r < 0.15) {
-      const u = users.find(x => !active.includes(x));
+    if (active.length + lurkers.length < 6 || r < (SEA ? 0.4 : 0.15)) {
+      const u = users.find(x => !active.includes(x) && !lurkers.includes(x));
+      // Sea: two of every three newcomers only enter the room (no comment)
+      if (u && SEA && (active.length + lurkers.length) % 3) { lurkers.push(u); broadcast({ type: 'join', user: u }); return; }
       if (u) { active.push(u); broadcast({ type: 'chat', user: u, text: pick(['参加！', '釣りたい！', 'やる！']) }); return; }
     }
     const u = pick(active);
