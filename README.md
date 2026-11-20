@@ -80,6 +80,7 @@ Mở `http://localhost:8787/` trên máy tính (hoặc `http://<IP-máy-tính>:8
 | `isn't online` / `Failed to retrieve Room ID` | Tài khoản chưa live – bình thường, server tự thử lại mỗi 10 giây |
 | `Rate Limited` | Kết nối quá nhiều lần trong 1 phút – chờ 1 phút |
 | Điện thoại không mở được trang | Kiểm tra cùng Wi-Fi, đúng IP (`ipconfig`), đúng cổng `8790`, tường lửa đã cho phép Node.js |
+| Người đã rời phòng vẫn ngồi trên thuyền | TikTok **không gửi sự kiện rời phòng**. Game ước lượng: khách chỉ vào xem (体験乗船) câu 1 con rồi tự xuống thuyền; khi số người trên thuyền > số người đang xem thì khách vào gần nhất xuống trước; người đã tương tác xuống sau 10 phút không comment/like/quà (người còn mồi/cần trả phí được giữ chỗ) |
 | Người vào phòng không lên thuyền | Xem terminal có dòng `👋 join <tên>` không, và `overlay pages` có ≥ 1 không. Người vào phòng **trước** khi hiện `Connected` sẽ không được tính – họ comment là lên thuyền |
 
 ---

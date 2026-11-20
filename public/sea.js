@@ -187,7 +187,7 @@ function seat(user, passive = false) {
   $('#seats').appendChild(el);
   const tip = rodTip(s);
   p = { user, seat: s, el, bait: BAITS[0], baitLeft: Infinity, rod: RODS[0], rodLeft: Infinity, state: 'idle', lastActive: Date.now(), token: 0, seenBoosts: new Set(), skip: false, frenzy: false,
-    hook: { x: tip.x + rand(-10, 30), y: tip.y, targetY: tip.y }, nibbleAt: 0, passive };
+    hook: { x: tip.x + rand(-10, 30), y: tip.y, targetY: tip.y }, nibbleAt: 0, passive, joinedAt: Date.now() };
   s.player = p;
   players.set(user.id, p);
   if (!stats.has(user.id)) stats.set(user.id, { user, pts: 0, best: null, dex: new Set() });
@@ -204,6 +204,34 @@ function updateVips() {
   for (const q of players.values()) q.el.classList.toggle('vip', top.includes(q));
 }
 function unseat(p) { p.token++; p.seat.player = null; players.delete(p.user.id); p.el.remove(); }
+// Leave the boat with a small fade + label (seat is freed immediately)
+function leaveBoat(p, label = 'またね！') {
+  if (!players.has(p.user.id)) return;
+  const head = seatStage(p.seat, 0, -96);
+  showAt(head.x, head.y, 'nibble', `👋 ${p.user.nickname.slice(0, 8)} ${label}`);
+  p.token++;
+  p.seat.player = null;
+  players.delete(p.user.id);
+  p.el.classList.add('leaving');
+  setTimeout(() => p.el.remove(), 700);
+}
+
+// TikTok sends no per-viewer "left" event, so stale seats are estimated:
+// - trial guests (entered, never interacted) leave after one catch (handled in fishLoop)
+// - when seated players outnumber current viewers, the most recently joined trial guests leave first
+// - full players leave after IDLE_MS without interaction, unless they still hold paid bait/rod
+const VIEWER_GRACE_MS = 10000; // the viewer count lags behind join events
+function trimToViewers(total) {
+  let extra = players.size - total;
+  if (extra <= 0) return;
+  const guests = [...players.values()].filter(q => q.passive && Date.now() - q.joinedAt > VIEWER_GRACE_MS).sort((a, b) => b.joinedAt - a.joinedAt);
+  for (const g of guests) { if (extra-- <= 0) break; leaveBoat(g); }
+}
+setInterval(() => {
+  for (const q of [...players.values()]) {
+    if (!q.passive && q.bait.id === 0 && q.rod.id === 0 && Date.now() - q.lastActive > IDLE_MS) leaveBoat(q);
+  }
+}, 15000);
 function updateTag(p) {
   const st = stats.get(p.user.id);
   const name = p.user.nickname.length > 6 ? p.user.nickname.slice(0, 6) + '…' : p.user.nickname;
@@ -326,6 +354,7 @@ async function fishLoop(p) {
       actors.splice(actors.indexOf(actor), 1);
       if (!alive()) return;
       p.state = 'rest';
+      if (p.passive) { await sleep(800); leaveBoat(p); return; } // trial guest: one try, then leave
       await restWait(p, alive);
       continue;
     }
@@ -340,6 +369,8 @@ async function fishLoop(p) {
     if (!alive()) return;
     landFish(p, fish, bait, rod);
     if (frenzyId) frenzyResult(frenzyId, true);
+    // Trial guest (never interacted): one catch, then leave the boat
+    if (p.passive) { await sleep(2500); if (alive() && p.passive) { leaveBoat(p); return; } }
     p.state = 'rest';
     p.hook.targetY = SURFACE_Y;
     await restWait(p, alive);
@@ -727,6 +758,7 @@ const handlers = {
   like: e => { const p = players.get(e.user.id); if (p) { p.lastActive = Date.now(); p.passive = false; } addGauge(e.user, e.count || 1); },
   // Entering the room is enough to board while there are free seats
   join: e => seat(e.user, true),
+  viewers: e => trimToViewers(e.total),
   share: () => {},
   follow: e => banner(e.user, `<div class="av"></div><div><div class="who">${esc(e.user.nickname)}</div><div class="what">フォローありがとう！</div></div>`, '', 2000),
   config: () => {},

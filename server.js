@@ -161,6 +161,11 @@ function connectTikTok(username) {
 
 // Event handlers for one connection
 function attach(conn) {
+  // Current viewer count (~every 2s). TikTok sends no per-viewer "left" event, so overlays use this to drop stale seats.
+  conn.on(WebcastEvent.ROOM_USER, d => {
+    const total = Number(d.total ?? d.viewerCount);
+    if (Number.isFinite(total)) broadcast({ type: 'viewers', total });
+  });
   conn.on(WebcastEvent.MEMBER, d => broadcast({ type: 'join', user: normUser(d.user) }));
   conn.on(WebcastEvent.CHAT, d => broadcast({ type: 'chat', user: normUser(d.user), text: d.content ?? d.comment ?? '' }));
   conn.on(WebcastEvent.LIKE, d => broadcast({ type: 'like', user: normUser(d.user), count: d.count ?? d.likeCount ?? 1 }));
